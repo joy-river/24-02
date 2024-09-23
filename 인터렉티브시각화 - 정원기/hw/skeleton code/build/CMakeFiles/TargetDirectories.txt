@@ -1,3 +1,0 @@
-C:/Users/dlrkd/Downloads/skeleton code/build/CMakeFiles/HelloGL.dir
-C:/Users/dlrkd/Downloads/skeleton code/build/CMakeFiles/ALL_BUILD.dir
-C:/Users/dlrkd/Downloads/skeleton code/build/CMakeFiles/ZERO_CHECK.dir
