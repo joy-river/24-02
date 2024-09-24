@@ -4,10 +4,11 @@
 out vec4 color;
 
 uniform mat4 Mv;
+uniform mat4 Proj; 
 
 void main() 
 {
-   gl_Position = Mv * gl_Vertex; 
+   gl_Position = Proj * Mv * gl_Vertex; 
    color = gl_Color;   
 }
 
