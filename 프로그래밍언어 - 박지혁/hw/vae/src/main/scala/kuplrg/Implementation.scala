@@ -31,9 +31,30 @@ object Implementation extends Template {
     }
   }
 
-  def bindingIds(expr: Expr): Set[String] = ???
+  def bindingIds(expr: Expr): Set[String] = {
+    expr match {
+      case Num(_) => Set.empty
+      case Add(e1, e2) => bindingIds(e1) ++ bindingIds(e2)
+      case Mul(e1, e2) => bindingIds(e1) ++ bindingIds(e2)
+      case Id(id) => Set.empty
+      case Val(id, e1, e2) => Set(id) ++ bindingIds(e1) ++ bindingIds(e2)
+    }
+  }
 
-  def boundIds(expr: Expr): Set[String] = ???
+  def boundIds(expr: Expr): Set[String] = {
+    expr match {
+      case Num(_) => Set.empty
+      case Add(e1, e2) => boundIds(e1) ++ boundIds(e2)
+      case Mul(e1, e2) => boundIds(e1) ++ boundIds(e2)
+      case Id(id) => Set(id)
+      case Val(id, e1, e2) => {
+        val x = Set.empty
+        if boundIds(e1).contains(id) | boundIds(e2).contains(id) then x ++ Set(id)
+
+        x ++ boundIds(e1) ++ boundIds(e2)
+      }
+    }
+  }
 
   def shadowedIds(expr: Expr): Set[String] = ???
 
