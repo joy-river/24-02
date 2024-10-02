@@ -46,16 +46,17 @@ object Implementation extends Template {
       case Num(_) => Set.empty
       case Add(e1, e2) => boundIds(e1) ++ boundIds(e2)
       case Mul(e1, e2) => boundIds(e1) ++ boundIds(e2)
-      case Id(id) => Set(id)
+      case Id(id) => Set.empty
       case Val(id, e1, e2) => {
-        val x = Set.empty
-        if boundIds(e1).contains(id) | boundIds(e2).contains(id) then x ++ Set(id)
-
-        x ++ boundIds(e1) ++ boundIds(e2)
-      }
-    }
+        val x = boundIds(e2)
+        if (x.contains(id)) then
+          boundIds(e1) ++ x + id
+        else
+          boundIds(e1) ++ x
+ 
+     }
   }
-
+  }
   def shadowedIds(expr: Expr): Set[String] = ???
 
 }
