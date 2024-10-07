@@ -47,16 +47,29 @@ object Implementation extends Template {
       case Add(e1, e2) => boundIds(e1) ++ boundIds(e2)
       case Mul(e1, e2) => boundIds(e1) ++ boundIds(e2)
       case Id(id) => Set.empty
+      case Val(id, e1, e2) =>{
+        val e1BoundIds = boundIds(e1)
+        val freeInE2 = freeIds(e2)
+        val e2BoundIds = e1BoundIds ++ boundIds(e2)
+        
+        if (freeInE2.contains(id)) Set(id) ++ e2BoundIds else e2BoundIds
+      }
+    }
+  }
+  
+  def shadowedIds(expr: Expr): Set[String] = {
+    expr match {
+      case Num(_) => Set.empty
+      case Add(e1, e2) => shadowedIds(e1) ++ shadowedIds(e2)
+      case Mul(e1, e2) => shadowedIds(e1) ++ shadowedIds(e2)
+      case Id(id) => Set.empty
       case Val(id, e1, e2) => {
-        val x = boundIds(e2)
-        if (x.contains(id)) then
-          boundIds(e1) ++ x + id
-        else
-          boundIds(e1) ++ x
- 
-     }
-  }
-  }
-  def shadowedIds(expr: Expr): Set[String] = ???
+        val e1ShadowedIds = shadowedIds(e1)
+        val e2Binding = bindingIds(e2)
+        val e2ShadowedIds = e1ShadowedIds ++ shadowedIds(e2)
 
+        if (e2Binding.contains(id)) Set(id) ++ e2ShadowedIds else e2ShadowedIds
+    }
+  }
+  }
 }
