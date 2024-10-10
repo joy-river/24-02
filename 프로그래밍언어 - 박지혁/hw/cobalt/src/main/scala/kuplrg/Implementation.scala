@@ -1,18 +1,16 @@
 package kuplrg
 
 object Implementation extends Template {
-
   import Expr.*
   import Value.*
-
+  
   // ---------------------------------------------------------------------------
   // Problem #1
   // ---------------------------------------------------------------------------
-  def interp(expr: Expr, env: Env): Value = expr match {
+  def interp(expr: Expr, env: Env): Value = 
+    expr match {
     case ENum(n) => NumV(n)
     case EBool(b) => BoolV(b)
-
-
     case EId(name) => env.get(name) match {
       case Some(v) => v
       case _ => error("free identifier")
@@ -130,11 +128,7 @@ object Implementation extends Template {
       val v1 = interp(le, env)
       val v2 = interp(fe, env)
 
-      (v1, v2) match {
-        case (ConsV(h, t), CloV(p, b, e)) => filter(v1, v2)
-        case (ConsV(h, t), _) => error("not a function")
-        case (_, CloV(p, b, e)) => error("not a list")
-      }
+      filter(v1, v2)
     } 
   
     case EFoldLeft(le, ie, fe) => {
@@ -142,27 +136,44 @@ object Implementation extends Template {
       val v2 = interp(ie, env)
       val v3 = interp(fe, env)
 
-      (v1, v2, v3) match {
-        case (ConsV(h, t), _, CloV(p, b, e)) => foldLeft(v1, v2, v3)
-        case (ConsV(h, t), _, _) => error("not a function")
-        case (_, _ , CloV(p, b, e)) => error("not a list")
-      }
+      foldLeft(v1, v2, v3)
     }
 
-    //  tuple
-    // case ETuple(exprs: List[Expr])
-    //  tuple projection
-    // case EProj(tuple: Expr, index: Int)
-    //  variable definition
-    // case EVal(name: String, value: Expr, scope: Expr)
-    //  lambda function
-    // case EFun(params: List[String], body: Expr)
-    //  mutually recursive function
-    // case ERec(defs: List[FunDef], scope: Expr)
-    //  function application
-    // case EApp(fun: Expr, args: List[Expr])
+    case ETuple(le) => {
+      TupleV(le.map(e => interp(e, env)))
+    }
+
+    case EProj(t, idx: Int) => {
+      val v1 = interp(t, env)
+
+      v1 match {
+        case TupleV(values) => 
+          if values.length > idx - 1 then values(idx - 1) else error("out of bounds")
+        case _ => error("not a tuple")
+      }
+
+    }
+
+    case EVal(n, v, s) => {
+      val v1 = interp(v, env)
+      val newEnv = env + (n -> v1)
+      
+      interp(s, newEnv)
+    }
+
+    case ERec(d, s) => {
+      lazy val newEnv : Env = env ++ d.map(f => f.name -> CloV(f.params, f.body, () => newEnv))
+
+      interp(s, newEnv)
+    }
 
     case EFun(p, b) => CloV(p, b, () => env)
+    
+    case EApp(f, a) => {
+      val v1 = interp(f, env)
+      val v2 = a.map(e => interp(e, env))
+      app(v1, v2)
+    }
 
   }
 
@@ -203,24 +214,50 @@ object Implementation extends Template {
     (list, func) match {
       case (NilV, _) => NilV
       case (ConsV(h, t), CloV(p, b, e)) => {
-        if eq(app(func, List(h)), BoolV(true)) 
-        then ConsV(h, filter(t, func)) 
-        else filter(t, func)
+        val is_bool = app(func, List(h))
+
+        is_bool match {
+          case BoolV(true) => ConsV(h, filter(t, func))
+          case BoolV(false) => filter(t, func)
+          case _ => error("not a boolean")
+        }
       }
       case (ConsV(h, t), _) => error("not a function")
       case (_, CloV(p, b, e)) => error("not a list")
     }
   }
 
-  def foldLeft(list: Value, init: Value, func: Value): Value = ???
+  def foldLeft(list: Value, init: Value, func: Value): Value = {
+    (list, func) match {
+      case (NilV, _) => init
+      case (ConsV(h, t), CloV(p, b, e)) => foldLeft(t, app(func, List(init, h)), func)
+      case (ConsV(h, t), _) => error("not a function")
+      case (_, CloV(p, b, e)) => error("not a list")
+    }
+  }
 
-  def app(func: Value, args: List[Value]): Value = ???
-
+  def app(func: Value, args: List[Value]): Value = {
+    func match {
+      case (CloV(p, b, e)) => {
+        if p.length == args.length then {
+          val env = e()
+          val newEnv = env ++ p.zip(args).toMap
+          interp(b, newEnv)
+        }
+        else error("arity mismatch")
+      }
+      case (_) => error("not a function") 
+  }
+  }
   // ---------------------------------------------------------------------------
   // Problem #2
-  // ---------------------------------------------------------------------------
-  def subExpr1: String = ???
+  // -------------------------------------------------------- -------------------
 
-  def subExpr2: String = ???
+  def subExpr1: String = """ list <- lists; 
+                          num <- list;
+                          if pred(num);
+                          """
+  def subExpr2: String = """num * num"""
+
 
 }
