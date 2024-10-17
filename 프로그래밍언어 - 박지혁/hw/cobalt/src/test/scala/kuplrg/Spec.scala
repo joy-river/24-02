@@ -116,12 +116,12 @@ class Spec extends SpecBase {
     def gcd(a) = b => if (a == 0) b else gcd(b % a)(a);
     gcd(432)(180)
   """
-  test(eval(expr1), "36", weight = 2)
+  test(eval(expr1), "36")
   val expr2 = """
     def fact(n) = if (n > 0) n * fact(n - 1) else 1;
     fact(10)
   """
-  test(eval(expr2), "3628800", weight = 3)
+  test(eval(expr2), "3628800")
   val expr3 = """
     def isPrime(n) =
       def iter(k) =
@@ -132,7 +132,7 @@ class Spec extends SpecBase {
       else iter(2);
     isPrime(1000003)
   """
-  test(eval(expr3), "true", weight = 5)
+  test(eval(expr3), "true")
   val expr4 = """
     def sum(n) =
       def iter(k) = acc =>
@@ -141,7 +141,7 @@ class Spec extends SpecBase {
       iter(1)(0);
     sum(100)
   """
-  test(eval(expr4), "5050", weight = 5)
+  test(eval(expr4), "5050")
   val expr5 = """
     def findKth(f) = k =>
       def iter(n) = k =>
@@ -153,7 +153,7 @@ class Spec extends SpecBase {
       iter(0)(k);
     findKth(x => x % 3 == 2)(43)
   """
-  test(eval(expr5), "128", weight = 5)
+  test(eval(expr5), "128")
   val expr6 = """
     def isPrime(n) =
       def iter(k) =
@@ -172,7 +172,7 @@ class Spec extends SpecBase {
       iter(0)(k);
     findKth(isPrime)(101)
   """
-  test(eval(expr6), "547", weight = 5)
+  test(eval(expr6), "547")
   val expr7 = """
     def addN(n) = x => x + n;
     def isEven(x) = x % 2 == 0;
@@ -186,7 +186,7 @@ class Spec extends SpecBase {
       iter(0)(k);
     findKth(n => isEven(addN(n)(1)))(23)
   """
-  test(eval(expr7), "45", weight = 5)
+  test(eval(expr7), "45")
   val expr8 = """
     def sum(n) = map => filter =>
       def iter(k) = acc =>
@@ -195,7 +195,7 @@ class Spec extends SpecBase {
       iter(1)(0);
     sum(10)(x => x * x)(x => x % 2 == 1)
   """
-  test(eval(expr8), "165", weight = 5)
+  test(eval(expr8), "165")
   val expr9 = """
     def fold(f) = default => from => to =>
       def iter(k) = acc =>
@@ -204,7 +204,7 @@ class Spec extends SpecBase {
       iter(from)(default);
     fold(x => y => x + y)(0)(53)(78)
   """
-  test(eval(expr9), "1703", weight = 5)
+  test(eval(expr9), "1703")
   val expr10 = """
     def fold(f) = default => from => to => map => filter =>
       def iter(k) = acc =>
@@ -213,13 +213,13 @@ class Spec extends SpecBase {
       iter(from)(default);
     fold(x => y => x + y)(0)(7)(33)(x => x * x)(x => x % 2 == 1)
   """
-  test(eval(expr10), "6510", weight = 5)
+  test(eval(expr10), "6510")
   val expr11 = """
     def isEven(x) = x == 0 || if (x > 0) isOdd(x - 1) else isOdd(x + 1);
     def isOdd(x) = if (x > 0) isEven(x - 1) else isEven(x + 1);
     isEven(532)
   """
-  test(eval(expr11), "true", weight = 5)
+  test(eval(expr11), "true")
   val expr12 = """
     def fold(list, default, fun) =
       def aux(prev, list) =
@@ -229,7 +229,7 @@ class Spec extends SpecBase {
     val sum = l => fold(l, 0, (x, y) => x + y);
     sum(List(1, 2, 3, 4, 5))
   """
-  test(eval(expr12), "15", weight = 5)
+  test(eval(expr12), "15")
   val expr13 = """
     def fill(x, n) = if (n == 0) Nil else x :: fill(x, n - 1);
     def fold(list, default, fun) =
@@ -239,7 +239,7 @@ class Spec extends SpecBase {
       aux(default, list);
     fold(fill(1, 10), List(0), (prev, cur) => prev.head + cur :: prev)
   """
-  test(eval(expr13), "List(10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0)", weight = 5)
+  test(eval(expr13), "List(10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0)")
   val expr14 = """
     def isPrime(n) =
       def aux(k) =
@@ -257,7 +257,7 @@ class Spec extends SpecBase {
         aux(2);
     factorize(936)
   """
-  test(eval(expr14), "List(2, 2, 2, 3, 3, 13)", weight = 5)
+  test(eval(expr14), "List(2, 2, 2, 3, 3, 13)")
   val expr15 = """
     val mkRec = body => {
       val fX = fY => {
@@ -272,7 +272,7 @@ class Spec extends SpecBase {
     });
     sum(10)
   """
-  test(eval(expr15), "55", weight = 5)
+  test(eval(expr15), "55")
   val expr16 = """
     val mkRec = body => {
       val fX = fY => {
@@ -284,7 +284,7 @@ class Spec extends SpecBase {
     val fac = mkRec(fac => n => if (n < 1) 1 else n * fac(n - 1));
     fac(10)
   """
-  test(eval(expr16), "3628800", weight = 5)
+  test(eval(expr16), "3628800")
   val expr17 = """
     def range(from, to) =
       if (from > to) Nil
@@ -295,7 +295,7 @@ class Spec extends SpecBase {
         .filter(y => y % 2 == 1)
         .map(y => x * y))
   """
-  test(eval(expr17), "List(2, 6, 10, 4, 12, 20)", weight = 5)
+  test(eval(expr17), "List(2, 6, 10, 4, 12, 20)")
   val expr18 = """
     def range(from, to) =
       if (from > to) Nil
@@ -307,7 +307,7 @@ class Spec extends SpecBase {
       if y % 2 != 0;
     } yield x * y
   """
-  test(eval(expr18), "List(2, 6, 10, 4, 12, 20)", weight = 5)
+  test(eval(expr18), "List(2, 6, 10, 4, 12, 20)")
 
   val expr19 = """
     def range(from, to) =
@@ -321,7 +321,7 @@ class Spec extends SpecBase {
     } yield x * y;
     list.foldLeft(0, (x, y) => x + y)
   """
-  test(eval(expr19), "54", weight = 5)
+  test(eval(expr19), "54")
 
   val expr20 = """
     def range(from, to) =
@@ -335,7 +335,50 @@ class Spec extends SpecBase {
     } yield x * y;
     list.foldLeft(1, (x, y) => x * y)
   """
-  test(eval(expr20), "115200", weight = 5)
+  test(eval(expr20), "115200")
+
+  // -------------------------------------------------------------------------
+  // Problem #1: additional tests
+  // -------------------------------------------------------------------------
+
+  // check numV for operands in arithmetic expressions
+  testExc(eval("1 + false"), "invalid operation", weight = 5)
+  testExc(eval("1 / false"), "invalid operation", weight = 5)
+
+  // tuple projection - index out of bound
+  test(eval("(1, 2)._1"), "1", weight = 5)
+  test(eval("(1, 2)._2"), "2", weight = 5)
+  test(eval("val x = (1, 2, 3); x._1"), "1", weight = 5)
+  testExc(eval("(1, x)._1"), "free identifier", weight = 5)
+
+  // eq for tuple
+  test(eval("(-4, List()) == (false, false)"), "false", weight = 5)
+
+  // list generation
+  test(eval("Nil :: Nil"), "List(List())", weight = 5)
+  testExc(eval("1 :: true"), "not a list", weight = 5)
+
+  // filter for Nil
+  test(eval("List().filter(x => true)"), "List()", weight = 5)
+  // filter condition must return boolean
+  testExc(eval("List(1, 2).filter(x => 3)"), "not a boolean", weight = 5)
+
+  // arity mismatch
+  testExc(eval("val x = () => true; x(1)"), "arity mismatch", weight = 5)
+  testExc(eval("List(1, 2).map((x, y) => 3)"), "arity mismatch", weight = 5)
+  testExc(eval("List(List(1, 2)).map(() => 3)"), "arity mismatch", weight = 5)
+  testExc(eval("List(List()).foldLeft(List(), (x) => List())"), "arity mismatch", weight = 5)
+  
+  // flatMap function must return list
+  testExc(eval("List(1).flatMap((x) => 5)"), "not a list", weight = 5)
+  testExc(eval("List(1).flatMap((x, y) => 5)"), "arity mismatch", weight = 5)
+
+  // ignore init value in foldLeft
+  test(eval("List(List(), List()).foldLeft((x, y) => List()(List(), List()), (x, y) => true)"), "true", weight = 5)
+  // list member can be function type in foldLeft
+  test(eval("List(List(), List()).foldLeft((x, y) => true, (x, y) => true)"), "true", weight = 5)
+  // list map
+  test(eval("List(1,2).map((x) => List())"), "List(List(), List())", weight = 5)
 
   // -------------------------------------------------------------------------
   // Problem #2: sqsumIfExpr
@@ -366,7 +409,5 @@ class Spec extends SpecBase {
       eval(sqsumIfExpr(lists.toString, predStr)) ==
       sqsumIf(lists, predF).toString
   }
-  test(pass, true, weight = 40)
-
-  /* Write your own tests */
+  test(pass, true, weight = 15)
 }

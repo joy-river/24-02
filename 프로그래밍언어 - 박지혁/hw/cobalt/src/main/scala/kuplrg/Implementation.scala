@@ -87,7 +87,14 @@ object Implementation extends Template {
       val v1 = interp(h, env)
       val v2 = interp(t, env)
       
-      ConsV(v1, v2)
+      (v1, v2) match {
+        case (CloV(p, b, e), _) => error("not a list")
+        case (_, CloV(p, b, e)) => error("not a list")
+        case (BoolV(b), _) => error("not a list")
+        case (_, BoolV(b)) => error("not a list")
+        case (_, _) => ConsV(v1, v2)
+      }
+      
     }
 
     case EHead(l) => {
@@ -204,7 +211,7 @@ object Implementation extends Template {
       case (ConsV(h, t)) => h match {
         case NilV => join(t)
         case ConsV(h1, t1) => ConsV(h1, join(ConsV(t1, t)))
-        case _ => ConsV(h, join(t)) 
+        case _ => error("not a list")
       }
       case (_) => error("not a list")
     }
