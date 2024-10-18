@@ -183,4 +183,6 @@ class Spec extends SpecBase {
   test(evalDS(expr20), "15")
 
   /* Write your own tests */
+  testExc(eval("val f = x => f(x); f(42)"), "free identifier")
+  test(evalDS("val f = x => f(x); f(42)"), 1)
 }
