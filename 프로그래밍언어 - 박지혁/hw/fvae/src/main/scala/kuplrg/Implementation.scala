@@ -32,7 +32,7 @@ object Implementation extends Template {
       case Id(id) => {
         env.get(id) match {
           case Some(v) => v
-          case _ => error("free identifier")
+          case _ => error("free identifier" + id)
         }
       }
       case Fun(p, b) => CloV(p, b, env)
@@ -77,7 +77,7 @@ object Implementation extends Template {
       }
       case Id(id) => env.get(id) match {
         case Some(v) => v
-        case _ => error("free identifier")
+        case _ => error("free identifier" + id)
       }
       case Fun(p, b) => CloV(p, b, env)
       case App(f, e1) => {
