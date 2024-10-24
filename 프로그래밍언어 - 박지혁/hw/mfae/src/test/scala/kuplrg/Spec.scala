@@ -66,6 +66,7 @@ class Spec extends SpecBase {
   test(eval(expr3), "3")
   test(eval(expr4), "18")
   test(eval(expr5), "7")
+  test(eval("var x = 2; var x = 3; x + 1"), "1")
 
   // -------------------------------------------------------------------------
   // interpCBR
@@ -90,6 +91,7 @@ class Spec extends SpecBase {
   test(evalCBR(expr3), "3")
   test(evalCBR(expr4), "18")
   test(evalCBR(expr5), "9")
+  test(evalCBR("var f = z => z = z * 5; var x = 1; var y = x; f(x); y = y + 1; y * (x + 1)"), "1")
 
   /* Write your own tests */
 }
