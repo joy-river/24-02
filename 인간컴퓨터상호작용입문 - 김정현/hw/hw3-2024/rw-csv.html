@@ -1,0 +1,126 @@
+<!-- CSS -->
+<style type="text/css">
+    table th, table td{
+    padding: 5px;
+}
+</style>
+
+<div>
+
+    <div>
+         <input type="file" name="file" id="file" accept=".csv" > <br><br>
+         <input type="button" id="btnsubmit" value="Read" onclick="readCSVFile();" >
+         <input type="button" id="btnsubmit2" value="Write" onclick="writeCSVFile();" >
+    </div>
+
+    <br><br>
+    <!-- List CSV file data -->
+    <table id="tblcsvdata" border="1" style="border-collapse: collapse;">
+         <thead>
+              <tr>
+                  <th>S.no</th>
+                  <th>Username</th>
+                  <th>Name</th>
+                  <th>Email</th>
+              </tr>
+         </thead>
+         <tbody>
+
+         </tbody>
+
+    </table>
+</div>
+
+<script type="text/javascript">
+function readCSVFile(){
+     var files = document.querySelector('#file').files;
+     
+     if(files.length > 0 ){
+
+          // Selected file
+          var file = files[0];
+
+          // FileReader Object
+          var reader = new FileReader();
+
+          // Read file as string 
+          reader.readAsText(file);
+
+          // Load event
+          reader.onload = function(event) {
+
+               // Read file data
+               var csvdata = event.target.result;
+
+               // Split by line break to gets rows Array
+               var rowData = csvdata.split('\n');
+	   alert(rowData);
+
+               // <table > <tbody>
+               var tbodyEl = document.getElementById('tblcsvdata').getElementsByTagName('tbody')[0];
+               tbodyEl.innerHTML = rowData;
+
+               // Loop on the row Array (change row=0 if you also want to read 1st row)
+               for (var row = 1; row < rowData.length; row++) {
+
+                     // Insert a row at the end of table
+                     var newRow = tbodyEl.insertRow();
+
+                     // Split by comma (,) to get column Array
+                     rowColData = rowData[row].split(',');
+
+                     // Loop on the row column Array
+                     for (var col = 0; col < rowColData.length; col++) {
+
+                          // Insert a cell at the end of the row
+                          var newCell = newRow.insertCell();
+                          newCell.innerHTML = rowColData[col];
+
+                     }
+
+               }
+          };
+
+     }else{
+          alert("Please select a file.");
+     }
+
+}
+
+function writeCSVFile(){
+
+//define the heading for each row of the data  
+var csv = 'Name,Profession\n';  
+
+//create CSV file data in an array  
+var csvFileData = [  
+   ['Alan Walker', 'Singer'],  
+   ['Cristiano Ronaldo', 'Footballer'],  
+   ['Saina Nehwal', 'Badminton Player'],  
+   ['Arijit Singh', 'Singer'],  
+   ['Terence Lewis', 'Dancer']  
+];  
+
+    //merge the data with CSV  
+    csvFileData.forEach(function(row) {  
+            csv += row.join(',');  
+            csv += "\n";  
+    });  
+
+
+    //display the created CSV data on the web browser   
+    document.write(csv);  
+  
+     
+    var hiddenElement = document.createElement('a');  
+    hiddenElement.href = 'data:text/csv;charset=utf-8,' + encodeURI(csv);  
+    hiddenElement.target = '_blank';  
+      
+    //provide the name for the CSV file to be downloaded  
+    hiddenElement.download = 'Famous Personalities.csv';  
+    hiddenElement.click();  
+
+
+}
+
+</script>
