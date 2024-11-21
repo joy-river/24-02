@@ -54,7 +54,7 @@ class Spec extends SpecBase {
   test(eval("var x = 2; (x = x + 1) + x"), "6")
   test(eval("x => x"), "<function>")
   test(eval("(x => x + 1)(2)"), "3")
-  test(eval("((x, y) => x - y)(2, 5, 8)"), "-3")
+  test(eval("((x, y) => x - y)(2, 5, 8)"), "-3" )
   test(eval("(x => x)()"), "undefined")
   test(eval("(x => { return x; 1 })(2)"), "2", weight = 3)
   test(eval("function f(x) { return x - 1; 42 } f(5)"), "4", weight = 3)

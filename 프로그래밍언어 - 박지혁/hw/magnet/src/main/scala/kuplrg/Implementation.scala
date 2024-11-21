@@ -91,7 +91,7 @@ object Implementation extends Template {
           val newMem = as.zip(vs).foldLeft(mem) {
             case (m, (a, v)) => m + (a -> v) 
           }
-          State(IEval(newEnv, b) :: k , s, h, newMem)
+          State(IEval(newEnv, b) :: k , rest, h, newMem)
         }
         case _ => error("not enough values")
       }
@@ -112,7 +112,7 @@ object Implementation extends Template {
         case v :: s => lookup(h, c) match {
           case KValue(k1, s1, h1) => {
             if h.get(Yield) != None then
-              State(k1, v :: s1, h1 + (Yield -> h(Yield)), mem)
+              State(k1, v :: s1, h1 + (Yield -> lookup(h, Yield)), mem)
             else
               State(k1, v :: s1, h1, mem)
           }
@@ -121,26 +121,26 @@ object Implementation extends Template {
         case _ => error("cannot jump")      
       }
       case ICall(n) :: k => s match {
-        case s if s.length > n => {
+        case s if s.length >= n => {
           val as = malloc(mem, n)
           val (vs, rest) = s.splitAt(n)
           rest match {
             case CloV(ps, b, env) :: rest => {
-              val sBody = if ps.length >= n then 
-                List.fill(ps.length - n)(UndefV) ++ vs ++ Nil
+              val sBody = if ps.length >= n then
+                Nil ++ vs.reverse ++ List.fill(ps.length - n)(UndefV)
               else
-                vs.take(ps.length) ++ Nil
+                Nil ++ vs.reverse.take(ps.length)
               val hBody = h.updated(Return, KValue(k, s, h)).removedAll(Set(Break, Continue, Yield))
               State(IDef(ps, env, EReturn(b)) :: Nil, sBody, hBody, mem )
             }
             case GenV(ps, b, env) :: rest => {
               val a = malloc(mem)
-              val sBody = if ps.length >= n then 
-                List.fill(ps.length - n)(UndefV) ++ vs ++ Nil
+              val sBody = if ps.length >= n then
+                Nil ++ vs.reverse ++ List.fill(ps.length - n)(UndefV)
               else
-                vs.take(ps.length) ++ Nil
-              val kBody = IPop :: IDef(ps, env, EReturn(ETry(b, "exception", EYield(b)))) :: Nil
-              State(k, IterV(a) :: s, h, mem + (a -> ContV(KValue(kBody, sBody, Map.empty))))
+                Nil ++ vs.reverse.take(ps.length)
+              val kBody = IPop :: IDef(ps, env, EReturn(ETry(b, "exception", EId("exception")))) :: Nil
+              State(k, IterV(a) :: rest, h, mem + (a -> ContV(KValue(kBody, sBody, Map.empty))))
             }
             case _ => error("not a function or generator")
           }
@@ -160,10 +160,8 @@ object Implementation extends Template {
         case v :: IterV(a) :: s => {
           mem.getOrElse(a, error("invalid address")) match {
             case ContV(KValue(k1, s1, h1)) => {
-              val Psi = KValue(k, IterV(a) :: s, h)
-              val hBody = h1
-              .updated(Yield, Psi)
-              .updated(Return, Psi)
+              val psi = KValue(k, IterV(a) :: s, h)
+              val hBody = h1 + (Yield -> psi) + (Return -> psi)
               State(k1, v :: s1, hBody, mem)
             }
             case _ => error("not a ContV")
@@ -173,20 +171,42 @@ object Implementation extends Template {
       }
       case IYield :: _ => s match {
         case v1 :: BoolV(b) :: v2 :: _ => {
-          h.getOrElse(Yield, error("invalid control operation")) match {
-            case KValue(k1, IterV(a) ::s1, h1) => {
+          lookup(h, Yield) match {
+            case KValue(k1, IterV(a) :: s1, h1) => {
               State(k1, ResultV(v1, b) :: s1, h1, mem + (a -> v2))
             }
             case _ => error("Not a ContV or Wrong stack")
          } 
         }
         case _ => error("Invalid stack ")
-      } 
+      }
+      case IValueField :: k => s match {
+        case ResultV(v, _) :: s => State(k, v :: s, h, mem)
+        case _ => error("Not a ResultV")
+      }
+      case IDoneField :: k => s match {
+        case ResultV(v, b) :: s => State(k, BoolV(b) :: s, h, mem)
+        case _ => error("Not a ResultV")
+      }
+      case _ => s match {
+        case v :: s => 
+        State(Nil, v :: Nil, h, mem)
+        case _ => error("there is no Result")
+      }
+
+      
     }
   // ---------------------------------------------------------------------------
   // Problem #2
   // ---------------------------------------------------------------------------
-  def bodyOfSquares: String = ???
+def bodyOfSquares: String =
+  """
+  if (from > to) return 0 else 
+  while (from <= to) {
+    yield from * from;
+    from += 1;
+  };
+  """
 
   // ---------------------------------------------------------------------------
   // Helper functions
