@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>KU Train Ticket Service</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <h1>KU Train Ticket Service</h1>
+    <h2>Welcome, JoyRiver</h2>
+
+    <section id="myReservations">
+      <h2>My Reservations</h2>
+      <table id="reservationTable" border="1">
+        <thead>
+          <tr>
+            <th><button class="sortBtn" data-column="date">Date</button></th>
+            <th><button class="sortBtn" data-column="time">Time</button></th>
+            <th>
+              <button class="sortBtn" data-column="trainNo">Train No</button>
+            </th>
+            <th>
+              <button class="sortBtn" data-column="weather">Weather</button>
+            </th>
+            <th><button class="sortBtn" data-column="from">From</button></th>
+            <th>
+              <button class="sortBtn" data-column="destination">
+                Destination
+              </button>
+            </th>
+            <th>
+              <button class="sortBtn" data-column="privacy">Privacy</button>
+            </th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+      <button id="downloadCsvBtn">Download CSV</button>
+      <input type="text" id="fileName" placeholder="Enter file name" />
+      <button id="loadCsvBtn">Load New CSV</button>
+      <input type="file" id="csvFileInput" accept=".csv" />
+    </section>
+
+    <section id="createReservation">
+      <button id="createReservationBtn">Create New Reservation</button>
+    </section>
+
+    <section id="reservationForm" style="display: none">
+      <h2>Create a New Reservation</h2>
+      <form id="reservationFormEl">
+        <label for="date">Date:</label>
+        <input type="date" id="date" required /><br /><br />
+
+        <label for="time">Time:</label>
+        <input type="time" id="time" required /><br /><br />
+
+        <label for="trainNo">Train No:</label>
+        <input type="text" id="trainNo" required /><br /><br />
+
+        <label for="weather">Weather:</label>
+        <input type="text" id="weather" required /><br /><br />
+
+        <label for="from">From:</label>
+        <input type="text" id="from" required /><br /><br />
+
+        <label for="destination">Destination:</label>
+        <input type="text" id="destination" required /><br /><br />
+
+        <label for="privacy">Privacy:</label>
+        <input type="text" id="privacy" required /><br /><br />
+
+        <button type="submit">Submit</button>
+        <button type="reset">Reset</button>
+      </form>
+      <button id="backToMenuBtn">Back to Main Menu</button>
+    </section>
+
+    <section id="reservationDetails" style="display: none">
+      <h2>Reservation Details</h2>
+      <p id="detailsContent"></p>
+      <button id="backToReservationsBtn">Back to Reservations</button>
+    </section>
+
+    <section id="filterSection">
+      <h2>Filter Reservations</h2>
+      <label for="filterText">Filter by Destination:</label>
+      <input type="text" id="filterText" placeholder="Enter destination" />
+      <button id="applyFilterBtn">Apply Filter</button>
+      <button id="resetFilterBtn">Reset Filter</button>
+    </section>
+
+    <section id="privacyControls">
+      <h2>Privacy Controls</h2>
+      <button id="togglePrivacyBtn">Toggle Privacy</button>
+    </section>
+
+    <script src="script.js"></script>
+  </body>
+</html>

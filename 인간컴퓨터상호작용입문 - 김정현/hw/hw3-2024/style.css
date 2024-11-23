@@ -1,0 +1,212 @@
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #fff5f7;
+  color: #333;
+}
+
+h1 {
+  background-color: #dc143c;
+  color: white;
+  padding: 20px;
+  text-align: center;
+  margin: 0;
+  font-size: 24px;
+}
+
+h2 {
+  color: #dc143c;
+  margin-bottom: 15px;
+  font-size: 20px;
+  text-align: center;
+}
+
+section {
+  margin: 20px auto;
+  padding: 15px;
+  max-width: 800px;
+  background-color: white;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 15px;
+}
+
+table th,
+table td {
+  border: 1px solid #ddd;
+  padding: 10px;
+  text-align: center;
+  font-size: 14px;
+}
+
+table th {
+  background-color: #ffe4e9;
+  color: #333;
+  cursor: pointer;
+}
+
+table tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+table tr:hover {
+  background-color: #ffe4e9;
+}
+
+button {
+  background-color: #dc143c;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 10px 15px;
+  font-size: 14px;
+  cursor: pointer;
+  margin-right: 5px;
+  transition: background-color 0.3s ease;
+}
+
+button:hover {
+  background-color: #c1123b;
+}
+
+input[type="text"],
+input[type="date"],
+input[type="time"],
+input[type="file"],
+input[type="number"] {
+  width: calc(100% - 20px);
+  padding: 10px;
+  margin-bottom: 15px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 14px;
+}
+
+input[type="text"]:focus,
+input[type="date"]:focus,
+input[type="time"]:focus,
+input[type="file"]:focus,
+input[type="number"]:focus {
+  border-color: #dc143c;
+  outline: none;
+}
+
+#privacyControls h2,
+#filterSection h2,
+#createReservation h2 {
+  font-size: 18px;
+  border-bottom: 2px solid #dc143c;
+  padding-bottom: 10px;
+  margin-bottom: 15px;
+}
+
+#reservationDetails {
+  background-color: #fff0f3;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+#detailsContent {
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 1024px) {
+  h1 {
+    font-size: 20px;
+    padding: 15px;
+  }
+
+  h2 {
+    font-size: 18px;
+  }
+
+  section {
+    padding: 10px;
+  }
+
+  table th,
+  table td {
+    font-size: 12px;
+    padding: 8px;
+  }
+
+  button {
+    font-size: 12px;
+    padding: 8px 10px;
+  }
+
+  input[type="text"],
+  input[type="date"],
+  input[type="time"],
+  input[type="file"],
+  input[type="number"] {
+    font-size: 12px;
+    padding: 8px;
+  }
+}
+
+@media (max-width: 768px) {
+  section {
+    max-width: 90%;
+  }
+
+  table th,
+  table td {
+    font-size: 11px;
+    padding: 6px;
+  }
+
+  button {
+    font-size: 10px;
+    padding: 6px 8px;
+  }
+
+  input[type="text"],
+  input[type="date"],
+  input[type="time"],
+  input[type="file"],
+  input[type="number"] {
+    font-size: 10px;
+    padding: 6px;
+  }
+
+  #reservationDetails {
+    padding: 15px;
+  }
+
+  #detailsContent {
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  h1 {
+    font-size: 18px;
+  }
+
+  h2 {
+    font-size: 16px;
+  }
+
+  button {
+    font-size: 9px;
+    padding: 5px 7px;
+  }
+
+  table {
+    font-size: 10px;
+  }
+
+  #detailsContent {
+    font-size: 12px;
+  }
+}
