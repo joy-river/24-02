@@ -63,20 +63,24 @@ object Implementation extends Template {
     }
     case Id(x) => tenv.vars.get(x) match {
       case Some(t) => t
-      case None => error("undefined variable")
+      case None => error("undefined variable : TypeCheck")
     }
     case Fun(params, e) => {
-      params.foreach(p => if (!wellFormed(p.ty, tenv))
-        then error("Not well-formed")
-      )
-      typeCheck(e, tenv.addVars(params.map(p => p.name -> p.ty)))
+      val ptys = params.map(_.ty)
+      for (pty <- ptys) mustValid(pty, tenv)
+      val rty = typeCheck(e, tenv.addVars(params.map(p => p.name -> p.ty)))
+
+      ArrowT(ptys, rty)
     }
     case Rec(x0, params, rty, e0, e1) => {
-      params.foreach(p => if (!wellFormed(p.ty, tenv)) then error("Not well-formed"))
-      if (!wellFormed(rty, tenv)) then error("Not well-formed")
-
-      val t1 = typeCheck(e0, tenv.addVars(params.map(p => p.name -> p.ty)).addVar(x0, ArrowT(params.map(_.ty), rty)))
-      if t1 == rty then typeCheck(e1, tenv.addVar(x0, ArrowT(params.map(_.ty), rty))) else error("Type error")
+      val ptys = params.map(_.ty)
+      for (pty <- ptys) mustValid(pty, tenv)
+      mustValid(rty, tenv)
+      val fty = ArrowT(ptys, rty)
+      val bty = typeCheck(e0, tenv.addVar(x0 -> fty)
+      .addVars(params.map(p => p.name -> p.ty)))
+      mustSame(bty, rty)
+      typeCheck(e1, tenv.addVar(x0 -> fty))
     }
     case App(e0, args) => {
       val t0 = typeCheck(e0, tenv)
@@ -88,7 +92,6 @@ object Implementation extends Template {
               val at = typeCheck(arg, tenv)
               if(at != param) then error("Type mismatch")
             }
-            case _ => error("Type mismatch")
           }
           rty
         }
@@ -105,16 +108,13 @@ object Implementation extends Template {
       }
     }
     case TypeDef(t, varts, e) => {
-      typeCheck(Id(t), tenv)
+      if(tenv.tys.contains(t)) error("Type unsound")
+
       val newtEnv = tenv.addType(t, varts.map(vart => vart.name -> vart.ptys).toMap)
-      if (!varts.forall(vart => vart.ptys.forall(pty => wellFormed(pty, newtEnv))))
-      then error("Type error")
-      varts.foreach( vart =>
-        newtEnv.addVar(vart.name, ArrowT(vart.ptys, NameT(t)))
-      )
-      val rty = typeCheck(e, newtEnv)
-      if (!wellFormed(rty, tenv)) then error("Type error")
-      rty
+      for (vart <- varts; pty <- vart.ptys) mustValid(pty, newtEnv)
+      mustValid(
+        typeCheck(e, newtEnv.addVars(varts.map(vart => vart.name -> ArrowT(vart.ptys, NameT(t))))),
+        tenv)
     }
 
     case Match(e, mcases) => typeCheck(e, tenv) match{
@@ -127,16 +127,15 @@ object Implementation extends Template {
       }
       case _ => error("Type error")
     }
+  }
+  
+  def mustValid(ty : Type, tEnv: TypeEnv): Type = ty match {
+    case NumT | BoolT => ty
+    case ArrowT(ptys, rty) => ArrowT(ptys.map(mustValid(_, tEnv)), mustValid(rty, tEnv))
+    case NameT(name) => if (!tEnv.tys.contains(name)) error("Type unsound")
+      NameT(name)
+  }
 
-  }
-  def wellFormed(t: Type, tEnv: TypeEnv): Boolean = t match{
-    case NumT | BoolT => true
-    case ArrowT(params, rety) => params.forall(wellFormed(_, tEnv)) && wellFormed(rety, tEnv)
-    case NameT(name) => tEnv.vars.get(name) match {
-      case Some(t) => wellFormed(t, tEnv)
-      case None => error("undefined variable")
-    }
-  }
 
   def mustValidMatch(cs: List[MatchCase], tmap: Map[String, List[Type]]): Unit =
     val xs = cs.map(_.name).toSet
@@ -221,7 +220,7 @@ object Implementation extends Template {
 
     case Id(x) => env.get(x) match {
       case Some(v) => v
-      case None => error("undefined variable")
+      case None => error("undefined variable : Interp")
     }
 
     case Fun(p, b) => CloV(p.map(p => p.name), b, () => env)
@@ -251,10 +250,16 @@ object Implementation extends Template {
     case TypeDef(t, varts, e) => {
       interp(e, env ++ varts.map(vart => vart.name -> ConstrV(vart.name)))
     }
-
-    
-
-
-
+  
+    case Match(e, mcases) => interp(e, env) match {
+      case VariantV(name, values) => mcases.find(_.name == name) match {
+        case Some(MatchCase(name, params, body)) => {
+          if (params.length != values.length) error("invalid match")
+          interp(body, env ++ (params zip values))
+        }
+        case None => error("invalid match")
+      }
+      case _ => error("not a variants")
+    }
   }
 }
