@@ -124,15 +124,11 @@ object Implementation extends Template {
         true
       }
     }
-    case (ArrowT(ltvars, lparamTys, lretTy), ArrowT(rtvars, rparamTys, rretTy)) => {
-      if (ltvars.length != rtvars.length) false
+    case (ArrowT(ltvars, ltys, lrty), ArrowT(rtvars, rtys, rrty)) => {
+      if (ltvars.length != rtvars.length) false 
+      else if (ltys.length != rtys.length) false
       else {
-        for (ltvar <- ltvars; rtvar <- rtvars) if (ltvar != rtvar) false
-        if (lparamTys.length != rparamTys.length) false
-        else {
-          for (lparamTy <- lparamTys; rparamTy <- rparamTys) if (!isSame(lparamTy, rparamTy)) false
-          isSame(lretTy, rretTy)
-        }
+        for (lty <- ltys; rty <- rtys) if (!isSame(subst(lty, ))) false
       }
     }
     case _ => false
@@ -140,7 +136,7 @@ object Implementation extends Template {
   
   def mustSame(lty: Type, rty: Type): Unit = if (!isSame(lty, rty)) error("Type error")
 
-  def subst(bodyTy: Type, tvars: List[String], tys: List[Type]): Type = bodyTy match {
+  def subst(bodyTy: Type, subs: List[String], tys: List[Type]): Type = bodyTy match {
     case UnitT | NumT | BoolT | StrT => bodyTy
     case ArrowT(tvars1, paramTys, retTy) =>
       ArrowT(
