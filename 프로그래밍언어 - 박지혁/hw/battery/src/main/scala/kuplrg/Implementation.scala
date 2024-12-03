@@ -9,7 +9,7 @@ object Implementation extends Template {
   import TypeInfo.*
 
   def typeCheck(expr: Expr, tenv: TypeEnv): Type = expr match {
-    case EUnit() => UnitT
+    case EUnit => UnitT
     case ENum(_) => NumT
     case EBool(_) => BoolT
     case EStr(_) => StrT
@@ -48,35 +48,111 @@ object Implementation extends Template {
       }
     }
     case EEq(e1, e2) => {
-      isSame
+      if(isSame(typeCheck(e1, tenv), typeCheck(e2, tenv))) BoolT
+      else error("type error")
+    }
+    case ELt(e1, e2) => {
+      (typeCheck(e1, tenv), typeCheck(e2, tenv)) match {
+        case (NumT, NumT) => BoolT
+        case _ => error("type error")
+      }
+    }
+    case ESeq(e1, e2) => {
+      val t1 = typeCheck(e1, tenv)
+      typeCheck(e2, tenv)
+    }
+    case EIf(e0, e1, e2) => {
+      (typeCheck(e0, tenv)) match {
+        case BoolT => {
+          val t1 = typeCheck(e1, tenv)
+          val t2 = typeCheck(e2, tenv)
+          if(isSame(t1, t2)) t1 else error("type error")
+        }
+        case _ => error("type error")
+      }
+    }
+    case EVal(x, tyOpt, e1, e2) => {
+      if (tyOpt.isEmpty) 
+      then typeCheck(e2, tenv.addVar(x, typeCheck(e1, tenv)))
+      else {
+        mustSame(tyOpt.get, typeCheck(e1, tenv))
+        typeCheck(e2, tenv.addVar(x, tyOpt.get))
+      }
+    }
+    case EFun(params, e0) => {
+      val ptys = params.map(_.ty)
+      for (pty <- ptys) mustValid(pty, tenv)
+      val rty = typeCheck(e0, tenv.addVars(params.map(p => p.name -> p.ty)))
+      ArrowT(List(), ptys, rty)
+    }
+    case EApp(fun, tys, args) => {
+      for (ty <- tys) mustValid(ty, tenv)
+      (typeCheck(fun, tenv)) match {
+        case ArrowT(tvars, paramTys, retTy) => {
+          val atys = args.map(arg => typeCheck(arg, tenv))
+          if (atys.length != paramTys.length) error("Argument mismatch")
+          for (aty <- atys; pty <- paramTys) mustSame(aty, subst(pty, tvars, tys))
+          retTy
+        }
+      }
     }
 
   }
 
   def mustValid(ty : Type, tEnv: TypeEnv): Type = ty match {
-    case NumT => ty
-    case ArrowT(pty, rty) => ArrowT(mustValid(pty, tEnv), mustValid(rty, tEnv))
-    case VarT(name) => if (!tEnv.tys.contains(name)) error("Type unsound")
-      VarT(name)
-    case PolyT(name, ty) => PolyT(name, mustValid(ty, tEnv.addType(name)))
+    case NumT | BoolT | StrT | UnitT => ty
+    case ArrowT(tvars, paramTys, retTy) => {
+      val newtEnv = tEnv.addTypeVars(tvars)
+      for (paramTy <- paramTys) mustValid(paramTy, newtEnv)
+      mustValid(retTy, newtEnv)
+      ArrowT(tvars, paramTys, retTy)
+    }
+    case IdT(name, tys) => if (!tEnv.tys.contains(name)) error("Type unsound")
+      IdT(name, tys.map(ty => mustValid(ty, tEnv)))
   }
 
   def isSame(lty : Type, rty: Type): Boolean = (lty, rty) match {
     case (NumT, NumT) => true
-    case (ArrowT(lty1, lrty), ArrowT(rty1, rrty)) => isSame(lty1, rty1) && isSame(lrty, rrty)
-    case (VarT(lname), VarT(rname)) => lname == rname
-    case (PolyT(lname, lrty), PolyT(rname, rrty)) => isSame(lrty, subst(rrty, rname, VarT(lname)))
+    case (BoolT, BoolT) => true
+    case (StrT, StrT) => true
+    case (UnitT, UnitT) => true
+    case (IdT(lname, ltys), IdT(rname, rtys)) => {
+      if (lname != rname) false
+      else if (ltys.length != rtys.length) false
+      else {
+        for (lty <- ltys; rty <- rtys) if (!isSame(lty, rty)) false
+        true
+      }
+    }
+    case (ArrowT(ltvars, lparamTys, lretTy), ArrowT(rtvars, rparamTys, rretTy)) => {
+      if (ltvars.length != rtvars.length) false
+      else {
+        for (ltvar <- ltvars; rtvar <- rtvars) if (ltvar != rtvar) false
+        if (lparamTys.length != rparamTys.length) false
+        else {
+          for (lparamTy <- lparamTys; rparamTy <- rparamTys) if (!isSame(lparamTy, rparamTy)) false
+          isSame(lretTy, rretTy)
+        }
+      }
+    }
     case _ => false
   }
   
   def mustSame(lty: Type, rty: Type): Unit = if (!isSame(lty, rty)) error("Type error")
 
-  def subst(bodyTy : Type, name: String, ty: Type): Type = bodyTy match {
-    case NumT => NumT
-    case ArrowT(paramTy, retTy) => ArrowT(subst(paramTy, name, ty), subst(retTy, name, ty))
-    case VarT(name2) => if (name == name2) ty else VarT(name2)
-    case PolyT(name2, bodyTy2) => if (name == name2) PolyT(name2, subst(bodyTy2, name, ty)) else PolyT(name2, subst(bodyTy2, name, ty))
+  def subst(bodyTy: Type, tvars: List[String], tys: List[Type]): Type = bodyTy match {
+    case UnitT | NumT | BoolT | StrT => bodyTy
+    case ArrowT(tvars1, paramTys, retTy) =>
+      ArrowT(
+        tvars1, 
+        paramTys.map(paramTy => subst(paramTy, tvars, tys)),
+        subst(retTy, tvars, tys)
+      )
+    case IdT(name2, tys2) =>
+      if (tvars.contains(name2)) tys(tvars.indexOf(name2))
+      else IdT(name2, tys2.map(ty => subst(ty, tvars, tys))) 
   }
+
 
 
 
