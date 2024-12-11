@@ -145,7 +145,7 @@ GLuint createGLSLProgram(char *vs, char *gs, char *fs)
 	if (status == GL_FALSE)
 	{
 		std::cerr << "Error validating program: "<< p << std::endl;
-		assert( false );
+		//assert( false );
 	}
 
 	// validation passed.. therefore, we will use this program
