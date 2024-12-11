@@ -63,6 +63,6 @@ void main() {
         voxelCoord += stepDir * stepSize;
     }
 
-
+   //fragColor = vec4(1.0, 0.0, 0.0, 0.0);
    fragColor = accColor;
 }
