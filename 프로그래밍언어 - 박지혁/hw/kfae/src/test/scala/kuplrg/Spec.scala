@@ -18,6 +18,8 @@ class Spec extends SpecBase {
   testExc(eval("{ vcc x; x }(5)"), "not a function")
   test(eval("{ vcc x; x }(y => y)(5)"), "5")
   test(eval("val k = { vcc x; x }; k"), "<continuation>")
+  test(eval("2 * { vcc a; val f = { vcc b; 3 * b(a) }; val x = 5 * f(10); x * 11 }"), "330")
+  test(eval("3 * { vcc a; val f = { vcc b; 3 * b(a) }; val x = 5 * f(10); 11 }"), "330")
   val expr1 = """
     val f = 1;
     { vcc k; f(k(42)) }
@@ -46,8 +48,8 @@ class Spec extends SpecBase {
   val expr5 = """
     {
       vcc done;
-      val f = { vcc esc; done(1 + { vcc k; esc(k) }) };
-      f(3)
+      val f = { vcc esc; done(1 + { vcc k; esc(done) }) };
+      f(19)
     }
   """
   test(eval(expr5), "4")

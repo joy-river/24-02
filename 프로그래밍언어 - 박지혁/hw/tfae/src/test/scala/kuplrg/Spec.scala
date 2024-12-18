@@ -16,6 +16,7 @@ class Spec extends SpecBase {
   test(eval("val x = 42; x"), "42: Number")
   test(eval("val x = 1; val y = 2; x + y"), "3: Number")
   test(eval("(x: Number) => x"), "<function>: Number => Number")
+  test(eval("(x: Number) => x; val x = 42; x"), "10: Number")
   test(eval("val f = (x: Number) => x; f"), "<function>: Number => Number")
   // not a function: Number
   testExc(eval("1(2)"))
