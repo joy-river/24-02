@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI Ticketing Service</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/style.css') }}"
+    />
+  </head>
+  <body>
+    <header>
+      <h1>LocKeting</h1>
+    </header>
+    <button
+      id="showRecommendButton"
+      class="show-recommend"
+      onclick="showRecommend()"
+    >
+      추천 목록 보기
+    </button>
+    <main>
+      <!-- 추천 행사 목록 -->
+      <section class="recommend-section" id="recommendSection">
+        <div class="recommend-header">
+          <span>추천 행사</span>
+          <button onclick="toggleRecommend()">☰</button>
+        </div>
+        <div class="info-cards">
+          <div class="card">
+            <h2>서울 뮤직 페스티벌</h2>
+            <p>날짜: 2024-01-15</p>
+            <p>위치: 서울</p>
+            <button onclick="fetchEventDetails(1)">자세히 보기</button>
+          </div>
+          <div class="card">
+            <h2>부산 아트 엑스포</h2>
+            <p>날짜: 2024-02-10</p>
+            <p>위치: 부산</p>
+            <button onclick="fetchEventDetails(2)">자세히 보기</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- 채팅창 -->
+      <section class="chat-section">
+        <div class="chatbot" id="chatbot">
+          <div class="chat-message bot">
+            <div class="message bot">
+              LocKeting에 오신 것을 환영합니다! 어떤 도움이 필요하신가요?
+            </div>
+          </div>
+        </div>
+        <div class="input-area">
+          <input
+            type="text"
+            id="userInput"
+            placeholder="메시지를 입력하세요..."
+          />
+          <button onclick="sendMessage()">전송</button>
+        </div>
+      </section>
+    </main>
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+  </body>
+</html>
